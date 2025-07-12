@@ -1,10 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const RandomTextGenerator = () => {
   const [currentText, setCurrentText] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [animatingText, setAnimatingText] = useState('')
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ไม่ทำงานถ้า focus อยู่ใน input หรือ textarea
+      if (
+        isGenerating ||
+        (e.target instanceof HTMLElement &&
+          ['INPUT', 'TEXTAREA'].includes(e.target.tagName))
+      ) {
+        return
+      }
+
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault()
+        generateRandomText()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGenerating])
 
   const textOptions = [
     'ไอ้เติ้ลร่างปกติ',
@@ -46,7 +67,7 @@ const RandomTextGenerator = () => {
     let currentIndex = 0
     const finalIndex = Math.floor(Math.random() * textOptions.length)
     let interval = 40
-    
+
     const animate = () => {
       const randomIndex = Math.floor(Math.random() * textOptions.length)
       setAnimatingText(textOptions[randomIndex])
